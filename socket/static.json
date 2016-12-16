@@ -1,0 +1,19 @@
+{
+  "css": {
+    "/socket/style/socket.css": "socketCss"
+  },
+  "js": {
+    "/socket/scripts/routes/socket.js": "socketRoute",
+    "/socket/scripts/controllers/socket.js": "socketController"
+  },
+  "moduleDependencies":{
+
+  },
+  "settings": ["/socket/admin-panel-setting.js"],
+  "bodystructure": {
+    "asidebarHook": [],
+    "sidebarHook": [],
+    "headerHook": [],
+    "footerHook":[]
+  }
+}

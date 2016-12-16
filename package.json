@@ -1,0 +1,18 @@
+{
+  "name": "socket",
+  "version": "1.0.0",
+  "main": "backend",
+  "description": "Real time data management with socket.io",
+  "author": "Robins Gupta",
+  "authorEmail": "robins@snaphy.com",
+  "dependencies": {
+  },
+  "optionalDependencies": {},
+  "repository": {
+    "type": "",
+    "url": ""
+  },
+  "devDependencies": {
+
+  }
+}

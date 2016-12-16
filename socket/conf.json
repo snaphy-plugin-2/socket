@@ -1,0 +1,7 @@
+{
+  "name": "socket",
+  "description": "Real time data management with socket.io",
+  "routeExposure": "/socket",
+  "activate": true,
+  "pluginDependencies": {}
+}
