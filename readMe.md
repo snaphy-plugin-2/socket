@@ -54,6 +54,39 @@ To listen to any connection and disconnect events on socket and outputs to stdou
 By default `debug = true` in conf.json to `log` for any data publish.  
 In `production` disable the `debug = false`.  
 
+###REAL TIME MODELS
+>By Default Models don't listen to real time activities.  
+
+####To Activate
+In `conf.json`
+```
+{
+   ...
+   ... 
+   "listen": [
+       {
+         "collection": "BrandManager",
+         "methods": ["POST", "PUT", "DELETE"],
+         "complexSubscribe": true
+       },
+       {
+         "collection": "Customer",
+         "methods": ["POST"]
+       }
+     ],
+   ... 
+   ...
+}
+```
+
+Here,  
+1) `collection` is name of the model.
+2) `methods` is the name of methods(events) to which this collection/model will listen to.
+3) `complexSubscribe` when set `true` start listening to any complex queries also.
+    - Complex Queries like  
+    - Listen to change in a model `Chat` where `customerId` == 12312 and `type` = "private"  
+    - After activating you can also subscribe the models to listen to any models with simple where query too.
+
 
 
 

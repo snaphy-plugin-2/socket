@@ -22,12 +22,14 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 		trackChanges();
 	};
 
-
+	//Start the socket servr..
 	const startSocketServer = function(){
 		//Run this after starting of the server...
 		server.once('started', function() {
 			server.io = socket(server.start);
 			listenToStatic(server.io);
+			const pubsub = require("./pubsub")(server, databaseObj, helper, packageObj, server.io);
+			pubsub.init();
 		});
 	};
 
