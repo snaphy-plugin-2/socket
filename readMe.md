@@ -80,9 +80,9 @@ In `conf.json`
 ```
 
 Here,  
-1) `collection` is name of the model.
-2) `methods` is the name of methods(events) to which this collection/model will listen to.
-3) `complexSubscribe` when set `true` start listening to any complex queries also.
+ 1. `collection` is name of the model.
+ 2. `methods` is the name of methods(events) to which this collection/model will listen to.
+ 3. `complexSubscribe` when set `true` start listening to any complex queries also.
     - Complex Queries like  
     - Listen to change in a model `Chat` where `customerId` == 12312 and `type` = "private"  
     - After activating you can also subscribe the models to listen to any models with simple where query too.
