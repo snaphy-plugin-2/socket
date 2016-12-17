@@ -3,6 +3,7 @@
     "/socket/style/socket.css": "socketCss"
   },
   "js": {
+    "/socket.io/socket.io.js": "socket.io",
     "/socket/scripts/routes/socket.js": "socketRoute",
     "/socket/scripts/controllers/socket.js": "socketController"
   },
