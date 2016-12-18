@@ -102,6 +102,7 @@ module.exports = function( server, databaseObj, helper, packageObj, socket) {
                             clients: 0
                         };
 
+                        
                         if(packageObj.debug){
                             console.info(`Room ${room} created successfully for namespace ${namespace.name}`);
                         }

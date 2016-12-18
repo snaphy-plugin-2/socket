@@ -260,18 +260,13 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 
                 if(ctx.where){
                     if(ctx.where.id){
-                        model.findById({
-                            where: {
-                                id: ctx.where.id
-                            }
-                        }, function(err, instance){
+                        model.findById(ctx.where.id, {}, function(err, instance){
                            if(err){
                                console.error("Socket: Error fetching data using where query in delete event type", err);
                            }else{
                                if(instance ){
                                     //Now sending object to next hook..
-                                   ctx.customInstance = instance;
-
+                                   ctx.hookState.instance = instance;
                                }
                            }
                            //Call the next middleware..
@@ -290,10 +285,10 @@ module.exports = function( server, databaseObj, helper, packageObj) {
             //Middle ware of after delete..
             model.observe('after delete', function(ctx, next){
                 //If instance is present from before delete middleware the broadcase the message of delete..
-                if(ctx.customInstance){
+                if(ctx.hookState.instance){
                     //Broadcast..new data
                     process.nextTick(function(){
-                        broadcast(ctx.customInstance, collection, packageObj.methods.DELETE);
+                        broadcast(ctx.hookState.instance, collection, packageObj.methods.DELETE);
                     });
                 }
                 //Call the next middleware..
