@@ -74,7 +74,6 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 				var data = options.data;
 				var modelId = options.modelId;
 				if (method === 'POST') {
-					//console.log('Posting new data');
 					let name = '/' + collection + '/' + method;
 					socket.emit(name, data);
 				}

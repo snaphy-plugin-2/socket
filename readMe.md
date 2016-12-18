@@ -5,9 +5,8 @@
 
 #####This plugin is exposed on  `/socket` route
 
-#####Please copy the` socket` folder to `common/settings/` after plugin installed.
+#####Please copy the `socket/socket` folder to `common/settings/` after plugin installed.
 
-##### TO install a npm module use `npm install moduleName --prefix ../../../ --save` and then save the module in package.json of plugin file.
 
 
 #API DOCUMENTATION
@@ -81,11 +80,15 @@ In `conf.json`
 
 Here,  
  1. `collection` is name of the model.
- 2. `methods` is the name of methods(events) to which this collection/model will listen to.
- 3. `complexSubscribe` when set `true` start listening to any complex queries also.
+ 2. `complexSubscribe` when set `true` start listening to any complex queries also.
     - Complex Queries like  
     - Listen to change in a model `Chat` where `customerId` == 12312 and `type` = "private"  
     - After activating you can also subscribe the models to listen to any models with simple where query too.
+
+
+
+#####FUTURE ROAD MAP
+ 1. Add `ACL` to server `subscribe` method for listening to any collection changes. 
 
 
 
