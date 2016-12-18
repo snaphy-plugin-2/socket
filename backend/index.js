@@ -29,7 +29,8 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 			server.io = socket(server.start);
 			listenToStatic(server.io);
 			const pubsub = require("./pubsub")(server, databaseObj, helper, packageObj, server.io);
-			pubsub.init();
+            //Add this to server..
+			server.pubsub = pubsub;
 		});
 	};
 
@@ -91,6 +92,8 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 
 	};
 
+
+
 	/**
 	 * Auto listen for any changes in the model defined in the `conf.json` by property `listen` and publish it accordingly.
 	 */
@@ -98,47 +101,92 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 		const {listen} = packageObj;
 		if(listen){
 			listen.forEach(function(collectionObj){
-				const {collection, methods} = collectionObj;
-				if(collection && methods){
-					methods.forEach(function(method){
-						if(method === "PUT"){
-							//Listen for update..
-							onChanges(collection, method);
-						}
-
-						if(method === "DELETE"){
-							//Listen for delete..
-							onDelete(collection);
-						}
-
-						if(method === "POST"){
-							//Listen for create..
-							onChanges(collection, method);
-						}
-					});
+				const {collection} = collectionObj;
+				if(collection){
+                    //Add PUT and POST changes
+                    onChanges(collection);
+                    //Add onDelete changes..
+                    onDelete(collection);
 				}
 			});
 		}
 
 	};
 
+
+
+    /**
+     * Broadcast message to subscribers of respective namespace ==> rooms
+     * @param instance {{}} MOdel instance of loopback
+     * @param modelName {string} name of model
+     * @param method {string} name of method
+     */
+    const broadcast = function(instance, modelName, method){
+        if(!method){
+            return console.error("Socket: Method name not present.");
+        }
+        if(server.pubsub){
+
+            const collection = server.pubsub.findOrCreate(modelName);
+            if(collection){
+                if(collection.namespaces){
+                    for(let key in collection.namespaces){
+                        if(collection.namespaces.hasOwnProperty(key)){
+                            const namespace = collection.namespaces[key];
+                            if(namespace.fields){
+                                //set room tag
+                                let room = "/";
+                                //set found flag == true
+                                let found = true;
+                                if(namespace.fields.length){
+                                    for(var i=0; i< namespace.fields.length; i++){
+                                        const field = namespace.fields[i];
+                                        if(!instance[field]){
+                                            found = false;
+                                            break;
+                                        }
+                                        room = room + instance[field] + "/";
+                                    }
+                                }
+
+                                if(found){
+                                    //If there is a room is present of given name..
+                                    if(namespace.rooms[room]){
+                                        if(packageObj.debug){
+                                            console.log(`Socket: Broadcasting its subscriber of room: ${room}, namespace: ${namespace.name} and method: ${method}`);
+                                        }
+                                        //Broadcast the message..to its subscribers
+                                        namespace.socket.to(room).emit(method.toUpperCase(), instance);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+
+
 	/**
 	 * Listen for onCreate and on Update of data and publish changes to the client subscribers.
 	 * @param collection {string} name of collection
-	 * @param method {string} name of method. PUT|POST
      */
-	const onChanges = function(collection, method){
+	const onChanges = function(collection){
 		let model = server.models[collection];
 		if(model){
 			if(packageObj.debug){
-				console.info("Socket: Tracking " + method +  " for collection: " + collection );
+				console.info("\nSocket: Tracking change PUSH and PUT for collection: " + collection );
 			}
 			
 			model.observe("after save", function(ctx, next){
+				/*
+				OLD METHOD..
 				if(method === "POST"){
 					if(ctx.isNewInstance){
 						if(packageObj.debug){
-							console.info("Socket: Publishing " + method + " event for collection: " + collection);
+							console.info("Socket: Publishing event for collection: " + collection);
 						}
 						publish({
 							collection: collection,
@@ -149,7 +197,7 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 				}else{
 					if(method === "PUT"){
 						if(packageObj.debug){
-							console.info("Socket: Publishing " + method + " event for collection: " + collection);
+							console.info("Socket: Publishing event for collection: " + collection);
 						}
 						publish({
 							collection: collection,
@@ -158,12 +206,30 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 							modelId: ctx.instance.id
 						});
 					}
-				}
+				}*/
+
+                if(ctx.isNewInstance){
+                    if(ctx.instance){
+                        //Broadcast..new data
+                        process.nextTick(function(){
+                           broadcast(ctx.instance, collection, packageObj.methods.POST);
+                        });
+                    }
+                }else{
+                    if(ctx.instance){
+                        //Broadcast..new data
+                        process.nextTick(function(){
+                            broadcast(ctx.instance, collection, packageObj.methods.PUT);
+                        });
+                    }
+                }
 				//Call the next middleware..
 				next();
 			});
 		}
 	};
+
+
 
 	/**
 	 * Listen for on delete of the model and publish reports to the client subscribers.
@@ -172,12 +238,13 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 	const onDelete = function(collection){
 		let model = server.models[collection];
 		if(model){
-
 			if(packageObj.debug){
 				console.info("Socket: Tracking DELETE for collection: " + collection );
 			}
 
-			model.observe('after delete', function(ctx, next){
+			model.observe('before delete', function(ctx, next){
+				/*
+				OLD METHOD..
 				if(ctx.where){
 					if(ctx.where.id){
 						if(packageObj.debug){
@@ -189,11 +256,49 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 							modelId: ctx.where.id
 						});
 					}
-				}
+				}*/
 
-				//Call the next middleware..
-				next();
+                if(ctx.where){
+                    if(ctx.where.id){
+                        model.findById({
+                            where: {
+                                id: ctx.where.id
+                            }
+                        }, function(err, instance){
+                           if(err){
+                               console.error("Socket: Error fetching data using where query in delete event type", err);
+                           }else{
+                               if(instance ){
+                                    //Now sending object to next hook..
+                                   ctx.customInstance = instance;
+
+                               }
+                           }
+                           //Call the next middleware..
+                           next();
+                        });
+                    }else{
+                        //Call the next middleware..
+                        next();
+                    }
+                }else{
+                    //Call the next middleware..
+                    next();
+                }
 			});
+
+            //Middle ware of after delete..
+            model.observe('after delete', function(ctx, next){
+                //If instance is present from before delete middleware the broadcase the message of delete..
+                if(ctx.customInstance){
+                    //Broadcast..new data
+                    process.nextTick(function(){
+                        broadcast(ctx.customInstance, collection, packageObj.methods.DELETE);
+                    });
+                }
+                //Call the next middleware..
+                next();
+            });
 		}
 	};
 

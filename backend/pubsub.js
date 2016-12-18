@@ -302,9 +302,8 @@ module.exports = function( server, databaseObj, helper, packageObj, socket) {
 
 
 
+    //Run the constructor..
+    init();
 
-
-    return {
-        init: init
-    }
+    return storage;
 };
