@@ -94,7 +94,7 @@ Here,
 
 
 
-######Usage on Client
+######Usage on Client(BROWSER)
 ```
 Suppose model name is BrandManager
 //Send POST REQUEST to http://0.0.0.0:3000/api/BrandManagers/subscribe?access_token=GzGSDEKaWovG9eCSVgYhJMxwEISLE2HIDsU9e23gD9d7C9Thxvfysz3KX6UQUyDM 
@@ -104,32 +104,33 @@ with data {
             }
           }
 
+//Connect to SOCKET
 var socket = io();
-undefined
+
+//Now connect to namespace /BrandManager/restrictHotDeal i.e subscribe to Those BrandManager model which have  property of restrictHotDeal
 var nsp = io('/BrandManager/restrictHotDeal');
-undefined
+
+
+/
+//Now connect to room: '/true/' i.e subscribe to Those BrandManager model changes which have  property of restrictHotDeal == true
 nsp.emit('create', '/true/');
-n {io: n, nsp: "/BrandManager/restrictHotDeal", json: n, ids: 0, acks: Object…}_callbacks: Objectacks: Objectconnected: truedisconnected: falseid: "yE9-mbkHagZJRex9AAAB"ids: 0io: njson: nnsp: "/BrandManager/restrictHotDeal"receiveBuffer: Array[0]sendBuffer: Array[0]subs: Array[3]__proto__: Object
-socket.on('PUT', function(data) {
-   console.log('Incoming message:', data);
-});
-n {io: n, nsp: "/", json: n, ids: 0, acks: Object…}
+
+//Now subscribe to namespace with PUT method 
 nsp.on('PUT', function(data) {
    console.log('Incoming message:', data);
 });
-n {io: n, nsp: "/BrandManager/restrictHotDeal", json: n, ids: 0, acks: Object…}_callbacks: Objectacks: Objectconnected: truedisconnected: falseid: "yE9-mbkHagZJRex9AAAB"ids: 0io: njson: nnsp: "/BrandManager/restrictHotDeal"receiveBuffer: Array[0]sendBuffer: Array[0]subs: Array[3]__proto__: Object
-nsp.to
-undefined
-nsp.on
-(t,e){return this._callbacks=this._callbacks||{},(this._callbacks["$"+t]=this._callbacks["$"+t]||[]).push(e),this}
-VM1394:2 Incoming message: Object {firstName: "PRINCE", lastName: "gup", email: "robin@demo.com", restrictHotDeal: true, status: "onhold"…}
-VM1394:2 Incoming message: Object {firstName: "PRINCE", lastName: "gup", email: "robin@demo.com", restrictHotDeal: true, status: "onhold"…}added: "2016-12-16T12:19:47.470Z"email: "robin@demo.com"firstName: "PRINCE"id: "5851d6149f203a756f362fa2"lastName: "gup"restrictHotDeal: truestatus: "onhold"updated: "2016-12-18T22:24:08.248Z"username: "robinskumar73"__proto__: Object
-socket.on('PUT', function(data) {
-   console.log('Incoming messagesadd:', data);
+
+//Now subscribe to namespace with PUT method 
+nsp.on('POST', function(data) {
+   console.log('Incoming message:', data);
 });
-n {io: n, nsp: "/", json: n, ids: 0, acks: Object…}
-VM1394:2 Incoming message: Object {firstName: "PRINCE", lastName: "gup", email: "robin@demo.com", restrictHotDeal: true, status: "onhold"…}
-VM1394:2 Incoming message: Object {firstName: "PRINCE", lastName: "gup", email: "robin@demo.com", restrictHotDeal: true, status: "onhold"…}
+
+//Now subscribe to namespace with PUT method 
+nsp.on('DELETE', function(data) {
+   console.log('Incoming message:', data);
+});
+
+VM1394:2 Incoming message: Object {firstName: "PRINCE", lastName: "gup", email: "robin@demo.com", restrictHotDeal: true, status: "onhold"…}added: "2016-12-16T12:19:47.470Z"email: "robin@demo.com"firstName: "PRINCE"id: "5851d6149f203a756f362fa2"lastName: "gup"restrictHotDeal: truestatus: "onhold"updated: "2016-12-18T22:24:08.248Z"username: "robinskumar73"__proto__: Object
 ```
 
 
