@@ -174,19 +174,28 @@ module.exports = function( server, databaseObj, helper, packageObj, socket) {
                                 },
                                 //When a new node connects to namespace..
                                 onConnect: function(socket){
+                                    console.info(`A Node connected with namespace ${namespaceString}`);
                                     this.clients++;
                                     //Join and findOrCreate rooms on calling..
                                     //This name space will listen to `create` event to join users to any room..
                                     socket.on('create', function(room){
                                         //increment clients number..
+                                        if(!that.namespaces[namespaceString].rooms[room]){
+                                            initRooms(that.namespaces[namespaceString], where);
+                                        }
+
                                         //If rooms present..
                                         if(that.namespaces[namespaceString].rooms[room]){
                                             //Increment rooms..
                                             that.namespaces[namespaceString].rooms[room].clients++;
                                             socket.join(room);
-                                            console.info(`Room ${room} joined under namespace ${namespaceString}.`);
-                                        }else{
-                                            console.error("Cannot join room as room object not presnet.");
+                                            if(packageObj.debug) {
+                                                console.info(`Room ${room} joined under namespace ${namespaceString}.`);
+                                            }
+                                        }else {
+                                            if (packageObj.debug) {
+                                                console.error(`Cannot join ${room} as room object not presnet.`);
+                                            }
                                         }
                                     });
 
@@ -197,15 +206,28 @@ module.exports = function( server, databaseObj, helper, packageObj, socket) {
                                         if(that.namespaces[namespaceString].rooms[room]){
                                             //Increment rooms..
                                             that.namespaces[namespaceString].rooms[room].clients--;
+                                            if(packageObj.debug) {
+                                                console.info(`Room ${room} leaving under namespace ${namespaceString}.`);
+                                            }
                                             if(that.namespaces[namespaceString].rooms[room].clients === 0){
                                                 //remove this room..
                                                 delete that.namespaces[namespaceString].rooms[room];
+                                                if(packageObj.debug) {
+                                                    console.info(`Deleting room from namespace as all clients got disconnected`);
+                                                }
+                                            }
+                                        }else{
+                                            if(packageObj.debug) {
+                                                console.info(`Cannot leave Room ${room} as room not present under namespace ${namespaceString}.`);
                                             }
                                         }
                                     });
                                 },
                                 onDisconnect: function(){
                                     this.clients--;
+                                    if(packageObj.debug) {
+                                        console.info(`A Node disconnected with namespace ${namespaceString}`);
+                                    }
                                     if(this.clients === 0){
                                         //Remove this namespaces from the parent list...
                                         this.remove();
@@ -213,8 +235,12 @@ module.exports = function( server, databaseObj, helper, packageObj, socket) {
                                 },
                                 //Delete this reference from the namespaces list..
                                 remove: function(){
+                                    if(packageObj.debug) {
+                                        console.info(`Deleting namespace  ${namespaceString} as all clients got disconnected`);
+                                    }
                                     delete this.parent[this.name];
                                 },
+
 
                                 //FindOrCreate Rooms for this namespace..
                                 findOrCreate: initRooms
