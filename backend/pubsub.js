@@ -70,6 +70,53 @@ module.exports = function( server, databaseObj, helper, packageObj, socket) {
 
         // --------------------------defines private methods.-----------------------
 
+
+        /**
+         * Initialize rooms object for given namespaces.
+         * @param namespace {{parent: (collection.namespaces|{parent}), name: string, fields: Array, socket: Array, clients: number, rooms: {parent: *}, onConnect: onConnect, onDisconnect: onDisconnect, remove: remove, findOrCreate}} object of which this chat room is a part of.
+         * @param where {{}} Where query of subscribe
+         * @returns {*}
+         */
+        const initRooms = function(namespace, where){
+            if(namespace){
+                if(where){
+                    //Room will be like for namespaces namespace key ==> "/Chat/Field1/Field2/Field3", rooms ==> /Field1Value/Field2Value/ room is value of each fields
+                    //For namespace like "/Chat" room will be ==> "/"
+                    let room = `/`;
+                    for(let key in where){
+                        if(where.hasOwnProperty(key)){
+                            //Add key to namespace..
+                            room = `${room}${where[key]}/`;
+                        }
+                    }
+
+                    //Now create room for this if not present..
+                    namespace.rooms = namespace.rooms || {};
+                    if(!namespace.rooms[room]){
+                        //Create a room for the given namespace..
+                        namespace.rooms[room] = {
+                            where: where,
+                            parent: namespace.rooms,
+                            name: room,
+                            //Client connected to this rooms..
+                            clients: 0
+                        };
+
+                        if(packageObj.debug){
+                            console.info(`Room ${room} created successfully for namespace ${namespace.name}`);
+                        }
+
+                    }else{
+                        if(packageObj.debug){
+                            console.info(`Room ${room} already present for namespace ${namespace.name}`);
+                        }
+                    }
+
+                    return namespace.rooms[room];
+                }
+            }
+        };
+
         /**
          * Create model storage for a model
          * @param modelName
@@ -79,8 +126,7 @@ module.exports = function( server, databaseObj, helper, packageObj, socket) {
             const collection = {
                 name: modelName,
                 namespaces:{
-                    //Adding parent reference to namespace..
-                    parent: collection
+
                 },
 
                 /**
@@ -99,6 +145,8 @@ module.exports = function( server, databaseObj, helper, packageObj, socket) {
                                 fields.push(key);
                             }
                         }
+
+
 
                         //Now search for this namespace object..
                         if(!this.namespaces[namespaceString]){
@@ -169,7 +217,7 @@ module.exports = function( server, databaseObj, helper, packageObj, socket) {
                                 },
 
                                 //FindOrCreate Rooms for this namespace..
-                                findOrCreate: initRooms(namespace, where)
+                                findOrCreate: initRooms
                             };
 
                             nsp.on('connection', function(socket){
@@ -182,52 +230,24 @@ module.exports = function( server, databaseObj, helper, packageObj, socket) {
                             //store the reference of socket variable in namespace..
                             this.namespaces[namespaceString].socket = nsp;
 
+                            if(packageObj.debug){
+                                console.info(`Namespace ${namespaceString} created successfully for Collection ${modelName}`);
+                            }
+                        }else{
+                            if(packageObj.debug){
+                                console.info(`Namespace ${namespaceString} already present`);
+                            }
                         }
+
 
                         return this.namespaces[namespaceString];
                     }
                 } //findOrCreate namespace method.
             };
 
-
-
-            /**
-             * Initialize rooms object for given namespaces.
-             * @param namespace {{parent: (collection.namespaces|{parent}), name: string, fields: Array, socket: Array, clients: number, rooms: {parent: *}, onConnect: onConnect, onDisconnect: onDisconnect, remove: remove, findOrCreate}} object of which this chat room is a part of.
-             * @param where {{}} Where query of subscribe
-             * @returns {*}
-             */
-            const initRooms = function(namespace, where){
-                if(namespace){
-                    if(where){
-                        //Room will be like for namespaces namespace key ==> "/Chat/Field1/Field2/Field3", rooms ==> /Field1Value/Field2Value:POST room is value of each fields plus method name
-                        //For namespace like "/Chat" room will be ==> "/"
-                        let room = `/`;
-                        for(let key in where){
-                            if(where.hasOwnProperty(key)){
-                                //Add key to namespace..
-                                room = `${room}${where[key]}/`;
-                            }
-                        }
-
-                        //Now create room for this if not present..
-                        namespace.rooms = namespace.rooms || {};
-                        if(!namespace.rooms[room]){
-                            //Create a room for the given namespace..
-                            namespace.rooms[room] = {
-                                where: where,
-                                parent: namespace.rooms,
-                                name: room,
-                                //Client connected to this rooms..
-                                clients: 0
-                            };
-                        }
-
-                        return namespace.rooms[room];
-                    }
-                }
-            };
-
+            //Adding parent reference to namespace..
+            //Add parent reference to namespaces..
+            collection.namespaces.parent = collection;
             return collection;
         };
 
@@ -242,8 +262,13 @@ module.exports = function( server, databaseObj, helper, packageObj, socket) {
              */
             findOrCreate: function(collection){
                 if(!eventStorage[collection]){
-                    eventStorage[collection] = initModelStorageObject();
+                    eventStorage[collection] = initModelStorageObject(collection);
                 }
+
+                if(packageObj.debug){
+                    console.info(`Collection ${collection} created successfully`);
+                }
+
                 return eventStorage[collection];
             }
         };
