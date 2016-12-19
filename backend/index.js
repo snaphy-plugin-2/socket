@@ -28,10 +28,12 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 		server.once('started', function() {
 			server.io = socket(server.start);
 			listenToStatic(server.io);
-			const pubsub = require("./pubsub")(server, databaseObj, helper, packageObj, server.io);
             //Add this to server..
 			server.pubsub = pubsub;
 		});
+
+        //Define the pub sub and subscribe method..
+        const pubsub = require("./pubsub")(server, databaseObj, helper, packageObj);
 	};
 
 	/**

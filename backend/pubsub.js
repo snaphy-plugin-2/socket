@@ -1,6 +1,6 @@
 /*Written by Robins Gupta*/
 (function(){'use strict';})();
-module.exports = function( server, databaseObj, helper, packageObj, socket) {
+module.exports = function( server, databaseObj, helper, packageObj) {
 
     //Constructor..
     const init = function(){
@@ -102,7 +102,7 @@ module.exports = function( server, databaseObj, helper, packageObj, socket) {
                             clients: 0
                         };
 
-                        
+
                         if(packageObj.debug){
                             console.info(`Room ${room} created successfully for namespace ${namespace.name}`);
                         }
@@ -151,7 +151,7 @@ module.exports = function( server, databaseObj, helper, packageObj, socket) {
 
                         //Now search for this namespace object..
                         if(!this.namespaces[namespaceString]){
-
+                            const socket = server.io;
                             //namespace not present..create one..
                             let nsp = socket.of(namespaceString);
                             let that = this;

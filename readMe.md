@@ -134,5 +134,37 @@ VM1394:2 Incoming message: Object {firstName: "PRINCE", lastName: "gup", email: 
 ```
 
 
+#####ON CLIENT USES(ANGULAR.JS)
+```
+    angular.module($snaphy.getModuleName())
+    .controller('socketControl', ['PubSub', function(PubSub){
+        var model = "Customer";
+        var where = {
+          income: "10000"
+        };
+        //Returns a callback with all the methods attached..
+        PubSub.subscribe(model, where, function(listen){
+            
+             listen.onDataAdded(function(data){
+                console.log("New Data", data);
+             });   
+             
+             listen.onDataUpdated(function(data){
+                console.log("Updated Data", data);
+             });    
+             
+             listen.onDataDeleted(function(data){
+                console.log("Deleted Data", data);
+             });
+                    
+             //Leave the room..
+             listen.leave();
+        });
+    }]);
+```
+
+####WARNING: At backend ALWAYS define `ACL` for `model` `subscribe` method to add security in file `model.json`.
+
+
 ######Written by Robins Gupta
 
