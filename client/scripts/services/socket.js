@@ -2,19 +2,6 @@
 
 angular.module($snaphy.getModuleName())
 
-//Define your services here..
-    /*//Define your services here..
-    .factory('Socket', [function(){
-
-        var connect = function(){
-            //Creating connection with server
-            var socket = io.connect();
-            return socket;
-        };
-
-        return connect();
-    }])
-*/
     //PubSub factory method defined here..
     .factory('PubSub', ["Database", function(Database){
 
@@ -73,7 +60,9 @@ angular.module($snaphy.getModuleName())
                  * Leave the connected room of namespace..
                  */
                 leave: function(){
-                    this.socket.emit('leave', this.room);
+                    if(this.socket){
+                        this.socket.emit('leave', this.room);
+                    }
                 },
                 /**
                  * Triggers when a new data has been added..

@@ -191,11 +191,12 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                                             that.namespaces[namespaceString].rooms[room].clients++;
                                             socket.join(room);
                                             if(packageObj.debug) {
-                                                console.info(`Room ${room} joined under namespace ${namespaceString}.`);
+                                                console.info(`Room ${room} joined under namespace ${namespaceString}. 
+                                                Total subscribed clients ${that.namespaces[namespaceString].rooms[room].clients}`);
                                             }
                                         }else {
                                             if (packageObj.debug) {
-                                                console.error(`Cannot join ${room} as room object not presnet.`);
+                                                console.error(`Cannot join ${room} as room object not present.`);
                                             }
                                         }
                                     });
