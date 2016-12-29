@@ -143,7 +143,7 @@ VM1394:2 Incoming message: Object {firstName: "PRINCE", lastName: "gup", email: 
           income: "10000"
         };
         //Returns a callback with all the methods attached..
-        PubSub.subscribe(model, where, function(listen){
+        PubSub.subscribe(model, where, function(err, listen){
             
              listen.onDataAdded(function(data){
                 console.log("New Data", data);
