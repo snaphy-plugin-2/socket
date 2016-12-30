@@ -27,7 +27,7 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 		//Run this after starting of the server...
 		server.once('started', function() {
 			server.io = socket(server.start);
-			listenToStatic(server.io);
+			//listenToStatic(server.io);
             //Add this to server..
 			server.pubsub = pubsub;
 		});

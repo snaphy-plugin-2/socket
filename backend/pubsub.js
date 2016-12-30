@@ -148,7 +148,6 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                         }
 
 
-
                         //Now search for this namespace object..
                         if(!this.namespaces[namespaceString]){
                             const socket = server.io;
@@ -171,28 +170,36 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                                 clients: 0,
                                 //Store the name of the rooms
                                 rooms: {
+                                    //number of rooms
+                                    length: 0,
                                     parent: that.namespaces[namespaceString]
                                 },
                                 //When a new node connects to namespace..
                                 onConnect: function(socket){
-                                    console.info(`A Node connected with namespace ${namespaceString}`);
                                     this.clients++;
+                                    console.info(`A Node connected with namespace ${namespaceString}.`);
                                     //Join and findOrCreate rooms on calling..
                                     //This name space will listen to `create` event to join users to any room..
                                     socket.on('create', function(room){
                                         //increment clients number..
                                         if(!that.namespaces[namespaceString].rooms[room]){
+                                            that.namespaces[namespaceString].rooms.length++;
                                             initRooms(that.namespaces[namespaceString], where);
                                         }
 
                                         //If rooms present..
                                         if(that.namespaces[namespaceString].rooms[room]){
-                                            //Increment rooms..
-                                            that.namespaces[namespaceString].rooms[room].clients++;
                                             socket.join(room);
+                                            var connectedClients = nsp.adapter.rooms[room];
+                                            if(connectedClients){
+                                                //Increment rooms..
+                                                that.namespaces[namespaceString].rooms[room].clients = connectedClients.length;
+                                            }else{
+                                                that.namespaces[namespaceString].rooms[room].clients = 0;
+                                            }
+
                                             if(packageObj.debug) {
-                                                console.info(`Room ${room} joined under namespace ${namespaceString}. 
-                                                Total subscribed clients ${that.namespaces[namespaceString].rooms[room].clients}`);
+                                                console.info(`Room ${room} joined under namespace ${namespaceString}.Total subscribed clients ${that.namespaces[namespaceString].rooms[room].clients}`);
                                             }
                                         }else {
                                             if (packageObj.debug) {
@@ -206,16 +213,27 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                                         socket.leave(room);
                                         //Decrement client and remove if empty..
                                         if(that.namespaces[namespaceString].rooms[room]){
-                                            //Increment rooms..
-                                            that.namespaces[namespaceString].rooms[room].clients--;
+                                            var connectedClients = nsp.adapter.rooms[room];
+                                            if(connectedClients){
+                                                //Decrement rooms..
+                                                that.namespaces[namespaceString].rooms[room].clients = connectedClients.length;
+                                            }else{
+                                                that.namespaces[namespaceString].rooms[room].clients = 0;
+                                            }
+
                                             if(packageObj.debug) {
                                                 console.info(`Room ${room} leaving under namespace ${namespaceString}.`);
                                             }
                                             if(that.namespaces[namespaceString].rooms[room].clients === 0){
                                                 //remove this room..
                                                 delete that.namespaces[namespaceString].rooms[room];
+                                                //decreasing number of rooms..
+                                                that.namespaces[namespaceString].rooms.length--;
                                                 if(packageObj.debug) {
                                                     console.info(`Deleting room from namespace as all clients got disconnected`);
+                                                }
+                                                if(that.namespaces[namespaceString].rooms.length === 0){
+                                                    that.namespaces[namespaceString].remove();
                                                 }
                                             }
                                         }else{
@@ -249,10 +267,20 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                             };
 
                             nsp.on('connection', function(socket){
-                                that.namespaces[namespaceString].onConnect(socket);
-                                socket.on('disconnect', function(){
-                                    that.namespaces[namespaceString].onDisconnect();
-                                });
+                                if(that.namespaces){
+                                    if(that.namespaces[namespaceString]){
+                                        //Only connect if connection is already not present..
+                                        that.namespaces[namespaceString].onConnect(socket);
+                                        socket.on('disconnect', function(){
+                                            that.namespaces[namespaceString].onDisconnect();
+                                        });
+                                    }else{
+                                        console.error("Socket: Namespace not found " + namespaceString);
+                                    }
+                                }else{
+                                    console.error("Socket: Namespace not found");
+                                }
+
                             });
 
                             //store the reference of socket variable in namespace..
