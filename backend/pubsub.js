@@ -166,6 +166,9 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                                 name: namespaceString,
                                 fields: fields,
                                 socket: nsp,
+                                socketId:{
+                                    //Unique id of each connected user to socket  with value as socket..
+                                },
                                 //Client connected to this namespace..
                                 clients: 0,
                                 //Store the name of the rooms
@@ -177,7 +180,16 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                                 //When a new node connects to namespace..
                                 onConnect: function(socket){
                                     this.clients++;
-                                    console.info(`A Node connected with namespace ${namespaceString}.`);
+                                    //http://stackoverflow.com/questions/9918203/remove-objects-on-disconnect-socket-io
+                                    if(!that.namespaces[namespaceString].socketId[socket.id]){
+                                        that.namespaces[namespaceString].socketId[socket.id] = socket;
+                                    }else{
+                                        delete socket;
+                                        //To avoid running this onConnect method more than once..
+                                        return false;
+                                    }
+
+                                    console.info(`A new node connected to namespace ${namespaceString}.`);
                                     //Join and findOrCreate rooms on calling..
                                     //This name space will listen to `create` event to join users to any room..
                                     socket.on('create', function(room){
@@ -243,14 +255,20 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                                         }
                                     });
                                 },
-                                onDisconnect: function(){
+                                onDisconnect: function(socket){
                                     this.clients--;
                                     if(packageObj.debug) {
                                         console.info(`A Node disconnected with namespace ${namespaceString}`);
                                     }
+                                    socket.removeAllListeners('create');
+                                    //http://stackoverflow.com/questions/9918203/remove-objects-on-disconnect-socket-io
+                                    if(that.namespaces[namespaceString].socketId[socket.id]){
+                                        delete that.namespaces[namespaceString].socketId[socket.id];
+                                    }
+
                                     if(this.clients === 0){
                                         //Remove this namespaces from the parent list...
-                                        this.remove();
+                                        this.remove(socket);
                                     }
                                 },
                                 //Delete this reference from the namespaces list..
@@ -272,7 +290,7 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                                         //Only connect if connection is already not present..
                                         that.namespaces[namespaceString].onConnect(socket);
                                         socket.on('disconnect', function(){
-                                            that.namespaces[namespaceString].onDisconnect();
+                                            that.namespaces[namespaceString].onDisconnect(socket);
                                         });
                                     }else{
                                         console.error("Socket: Namespace not found " + namespaceString);
