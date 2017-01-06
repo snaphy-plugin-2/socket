@@ -260,16 +260,18 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                                     if(packageObj.debug) {
                                         console.info(`A Node disconnected with namespace ${namespaceString}`);
                                     }
-                                    socket.removeAllListeners('create');
+
                                     //http://stackoverflow.com/questions/9918203/remove-objects-on-disconnect-socket-io
                                     if(that.namespaces[namespaceString].socketId[socket.id]){
                                         delete that.namespaces[namespaceString].socketId[socket.id];
                                     }
+                                    
 
                                     if(this.clients === 0){
                                         //Remove this namespaces from the parent list...
                                         this.remove(socket);
                                     }
+                                    socket.removeAllListeners('create');
                                 },
                                 //Delete this reference from the namespaces list..
                                 remove: function(){
