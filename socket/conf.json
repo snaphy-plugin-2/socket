@@ -13,14 +13,15 @@
   },
   "listen": [
     {
-      "collection": "BrandManager",
-      "methods": ["POST", "PUT", "DELETE"]
-    },
-    {
-      "collection": "Customer",
-      "methods": ["POST"]
+      "collection": "Customer"
     }
   ],
+
+  "methods":{
+    "POST":"POST",
+    "PUT": "PUT",
+    "DELETE": "DELETE"
+  },
   "activate": true,
   "pluginDependencies": {}
 }

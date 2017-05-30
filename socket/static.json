@@ -4,8 +4,7 @@
   },
   "js": {
     "/socket.io/socket.io.js": "socket.io",
-    "/socket/scripts/routes/socket.js": "socketRoute",
-    "/socket/scripts/controllers/socket.js": "socketController"
+    "/socket/scripts/services/socket.js": "socketServices"
   },
   "moduleDependencies":{
 
