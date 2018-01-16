@@ -224,6 +224,10 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                                     socket.on('leave', function(room){
                                         //leave this room..
                                         socket.leave(room);
+                                        if(!that.namespaces[namespaceString].rooms){
+                                            return;
+                                        }
+                                        
                                         //Decrement client and remove if empty..
                                         if(that.namespaces[namespaceString].rooms[room]){
                                             var connectedClients = nsp.adapter.rooms[room];
