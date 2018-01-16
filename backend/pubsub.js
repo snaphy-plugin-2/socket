@@ -224,7 +224,7 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                                     socket.on('leave', function(room){
                                         //leave this room..
                                         socket.leave(room);
-                                        if(!that.namespaces[namespaceString].rooms){
+                                        if(!that.namespaces[namespaceString]){
                                             return;
                                         }
                                         
