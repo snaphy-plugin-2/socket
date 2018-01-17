@@ -299,7 +299,11 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                                         //Only connect if connection is already not present..
                                         that.namespaces[namespaceString].onConnect(socket);
                                         socket.on('disconnect', function(){
-                                            that.namespaces[namespaceString].onDisconnect(socket);
+                                            if(that.namespaces[namespaceString]){
+                                                if(that.namespaces[namespaceString].onDisconnect){
+                                                    that.namespaces[namespaceString].onDisconnect(socket);
+                                                }
+                                            }
                                         });
                                     }else{
                                         console.error("Socket: Namespace not found " + namespaceString);
