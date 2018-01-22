@@ -224,36 +224,41 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                                     socket.on('leave', function(room){
                                         //leave this room..
                                         socket.leave(room);
-                                        //Decrement client and remove if empty..
-                                        if(that.namespaces[namespaceString].rooms[room]){
-                                            var connectedClients = nsp.adapter.rooms[room];
-                                            if(connectedClients){
-                                                //Decrement rooms..
-                                                that.namespaces[namespaceString].rooms[room].clients = connectedClients.length;
-                                            }else{
-                                                that.namespaces[namespaceString].rooms[room].clients = 0;
-                                            }
+                                        if(that.namespaces[namespaceString]){
+                                            if(that.namespaces[namespaceString].rooms){
+                                                //Decrement client and remove if empty..
+                                                if(that.namespaces[namespaceString].rooms[room]){
+                                                    var connectedClients = nsp.adapter.rooms[room];
+                                                    if(connectedClients){
+                                                        //Decrement rooms..
+                                                        that.namespaces[namespaceString].rooms[room].clients = connectedClients.length;
+                                                    }else{
+                                                        that.namespaces[namespaceString].rooms[room].clients = 0;
+                                                    }
 
-                                            if(packageObj.debug) {
-                                                console.info(`Room ${room} leaving under namespace ${namespaceString}.`);
-                                            }
-                                            if(that.namespaces[namespaceString].rooms[room].clients === 0){
-                                                //remove this room..
-                                                delete that.namespaces[namespaceString].rooms[room];
-                                                //decreasing number of rooms..
-                                                that.namespaces[namespaceString].rooms.length--;
-                                                if(packageObj.debug) {
-                                                    console.info(`Deleting room from namespace as all clients got disconnected`);
+                                                    if(packageObj.debug) {
+                                                        console.info(`Room ${room} leaving under namespace ${namespaceString}.`);
+                                                    }
+                                                    if(that.namespaces[namespaceString].rooms[room].clients === 0){
+                                                        //remove this room..
+                                                        delete that.namespaces[namespaceString].rooms[room];
+                                                        //decreasing number of rooms..
+                                                        that.namespaces[namespaceString].rooms.length--;
+                                                        if(packageObj.debug) {
+                                                            console.info(`Deleting room from namespace as all clients got disconnected`);
+                                                        }
+                                                        if(that.namespaces[namespaceString].rooms.length === 0){
+                                                            that.namespaces[namespaceString].remove();
+                                                        }
+                                                    }
+                                                }else{
+                                                    if(packageObj.debug) {
+                                                        console.info(`Cannot leave Room ${room} as room not present under namespace ${namespaceString}.`);
+                                                    }
                                                 }
-                                                if(that.namespaces[namespaceString].rooms.length === 0){
-                                                    that.namespaces[namespaceString].remove();
-                                                }
-                                            }
-                                        }else{
-                                            if(packageObj.debug) {
-                                                console.info(`Cannot leave Room ${room} as room not present under namespace ${namespaceString}.`);
                                             }
                                         }
+                                        
                                     });
                                 },
                                 onDisconnect: function(socket){
@@ -292,10 +297,17 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                             nsp.on('connection', function(socket){
                                 if(that.namespaces){
                                     if(that.namespaces[namespaceString]){
-                                        //Only connect if connection is already not present..
-                                        that.namespaces[namespaceString].onConnect(socket);
+                                        if(that.namespaces[namespaceString].onConnect){
+                                            //Only connect if connection is already not present..
+                                            that.namespaces[namespaceString].onConnect(socket);
+                                        }
+                                        
                                         socket.on('disconnect', function(){
-                                            that.namespaces[namespaceString].onDisconnect(socket);
+                                            if(that.namespaces[namespaceString]){
+                                                if(that.namespaces[namespaceString].onDisconnect){
+                                                    that.namespaces[namespaceString].onDisconnect(socket);
+                                                }
+                                            }
                                         });
                                     }else{
                                         console.error("Socket: Namespace not found " + namespaceString);

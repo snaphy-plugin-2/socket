@@ -2,7 +2,9 @@
 module.exports = function( server, databaseObj, helper, packageObj) {
 
 	const socket = require('socket.io');
-
+	const process = require('process');
+	//https://stackoverflow.com/questions/9768444/possible-eventemitter-memory-leak-detected
+	process.setMaxListeners(0);
 
 	/**
 	 * Here server is the main app object
@@ -24,6 +26,9 @@ module.exports = function( server, databaseObj, helper, packageObj) {
 
 	//Start the socket servr..
 	const startSocketServer = function(){
+		//Define the pub sub and subscribe method..
+		const pubsub = require("./pubsub")(server, databaseObj, helper, packageObj);
+		
 		//Run this after starting of the server...
 		server.once('started', function() {
 			server.io = socket(server.start);
@@ -31,9 +36,6 @@ module.exports = function( server, databaseObj, helper, packageObj) {
             //Add this to server..
 			server.pubsub = pubsub;
 		});
-
-        //Define the pub sub and subscribe method..
-        const pubsub = require("./pubsub")(server, databaseObj, helper, packageObj);
 	};
 
 	/**
