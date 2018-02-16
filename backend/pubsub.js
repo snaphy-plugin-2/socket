@@ -195,9 +195,11 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                                     //This name space will listen to `create` event to join users to any room..
                                     socket.on('create', function(room){
                                         //increment clients number..
-                                        if(!that.namespaces[namespaceString].rooms[room]){
-                                            that.namespaces[namespaceString].rooms.length++;
-                                            initRooms(that.namespaces[namespaceString], where);
+                                        if(room){
+                                            if(!that.namespaces[namespaceString].rooms[room]){
+                                                that.namespaces[namespaceString].rooms.length++;
+                                                initRooms(that.namespaces[namespaceString], where);
+                                            }
                                         }
 
                                         //If rooms present..
