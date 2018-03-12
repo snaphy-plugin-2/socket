@@ -5,9 +5,7 @@ module.exports = function( server, databaseObj, helper, packageObj) {
     const EventEmitter = require('events');
     //https://stackoverflow.com/questions/9768444/possible-eventemitter-memory-leak-detected
 	process.setMaxListeners(0);
-    const emitter = new EventEmitter();
-    // or 0 to turn off the limit
-    emitter.setMaxListeners(0);
+    
 
 	/**
 	 * Here server is the main app object
