@@ -216,14 +216,14 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                 if(ctx.isNewInstance){
                     if(ctx.instance){
                         //Broadcast..new data
-                        process.nextTick(function(){
+                        setImmediate(function(){
                            broadcast(ctx.instance, collection, packageObj.methods.POST);
                         });
                     }
                 }else{
                     if(ctx.instance){
                         //Broadcast..new data
-                        process.nextTick(function(){
+                        setImmediate(function(){
                             broadcast(ctx.instance, collection, packageObj.methods.PUT);
                         });
                     }

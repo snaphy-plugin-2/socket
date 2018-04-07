@@ -151,7 +151,7 @@ module.exports = function( server, databaseObj, helper, packageObj) {
                         //Now search for this namespace object..
                         if(!this.namespaces[namespaceString]){
                             const socket = server.io;
-                            socket.setMaxListeners(0);
+                            //socket.setMaxListeners(0);
                             //namespace not present..create one..
                             let nsp = socket.of(namespaceString);
                             let that = this;
